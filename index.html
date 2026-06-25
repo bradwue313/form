@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Band Audition Form</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem 4rem; }
+  .wrap { max-width: 580px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 2rem; }
+  .icon-ring { width: 56px; height: 56px; border-radius: 50%; border: 1px solid #ddd; background: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 24px; }
+  h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+  .sub { font-size: 14px; color: #666; }
+  .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .section-tag { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #999; margin-bottom: 1rem; }
+  .field { margin-bottom: 1.1rem; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 5px; }
+  .req { color: #e05c2a; margin-left: 2px; }
+  input[type=text], input[type=hidden] { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border-color .15s; }
+  input[type=text]:focus { border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,.1); }
+  .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .rc { border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: border-color .12s, background .12s; user-select: none; }
+  .rc:hover { border-color: #bbb; background: #fafafa; }
+  .rc.active { border: 2px solid #185FA5; background: #EBF3FD; }
+  .rc .ri { font-size: 20px; width: 36px; height: 36px; border-radius: 8px; background: #f5f5f3; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .rc.active .ri { background: #c5ddf7; }
+  .rc .rn { font-size: 13px; font-weight: 600; color: #1a1a1a; line-height: 1.3; }
+  .rc .rs { font-size: 11px; color: #888; }
+  .rc.active .rn { color: #0C447C; }
+  .rc.active .rs { color: #185FA5; }
+  .qs-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; display: none; }
+  .qs-card.show { display: block; animation: fadein .2s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .qs-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+  .qs-badge { font-size: 20px; width: 38px; height: 38px; border-radius: 8px; background: #EBF3FD; display: flex; align-items: center; justify-content: center; }
+  .qs-header h2 { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+  .qs-header p { font-size: 12px; color: #888; }
+  .q-row { margin-bottom: 1.1rem; }
+  .q-row:last-child { margin-bottom: 0; }
+  .q-lbl { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
+  .q-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #f0f0ee; border: 1px solid #ddd; font-size: 11px; font-weight: 600; color: #777; flex-shrink: 0; margin-top: 1px; }
+  textarea { width: 100%; min-height: 68px; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; outline: none; transition: border-color .15s; }
+  textarea:focus { border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,.1); }
+  .submit-btn { width: 100%; padding: 13px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity .15s; }
+  .submit-btn:hover { opacity: .85; }
+  .submit-btn:active { transform: scale(.99); }
+  .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .done { display: none; text-align: center; padding: 3rem 1rem; }
+  .done.show { display: block; }
+  .done-ring { width: 56px; height: 56px; border-radius: 50%; background: #e8f5e0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 26px; }
+  .done h2 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .done p { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
+  .reset-btn { font-size: 13px; padding: 9px 22px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; cursor: pointer; font-family: inherit; }
+  .reset-btn:hover { background: #f5f5f3; }
+  .error-msg { background: #fff0ee; border: 1px solid #f5c4b3; border-radius: 8px; color: #993C1D; font-size: 13px; padding: 10px 14px; margin-bottom: 1rem; display: none; }
+  .error-msg.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="formView">
+  <div class="header">
+    <div class="icon-ring">🎵</div>
+    <h1>Band audition form</h1>
+    <p class="sub">Select your role to reveal your questions</p>
+  </div>
+
+  <div class="error-msg" id="errorMsg">Something went wrong sending your form. Please try again.</div>
+
+  <div class="card">
+    <div class="section-tag">Your info</div>
+    <div class="field">
+      <label>Full name <span class="req">*</span></label>
+      <input type="text" id="fullName" placeholder="e.g. Alex Johnson" />
+    </div>
+    <div class="field">
+      <label>Room number <span class="req">*</span></label>
+      <input type="text" id="roomNum" placeholder="e.g. 204" />
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-tag">Select your role</div>
+    <div class="role-grid">
+      <div class="rc" data-role="singer" onclick="pickRole(this)">
+        <div class="ri">🎤</div>
+        <div><div class="rn">Singer</div><div class="rs">Lead vocals</div></div>
+      </div>
+      <div class="rc" data-role="electric" onclick="pickRole(this)">
+        <div class="ri">⚡</div>
+        <div><div class="rn">Electric guitar</div><div class="rs">Lead / rhythm</div></div>
+      </div>
+      <div class="rc" data-role="guitar" onclick="pickRole(this)">
+        <div class="ri">🎸</div>
+        <div><div class="rn">Guitar</div><div class="rs">Acoustic / bass</div></div>
+      </div>
+      <div class="rc" data-role="drummer" onclick="pickRole(this)">
+        <div class="ri">🥁</div>
+        <div><div class="rn">Drummer</div><div class="rs">Percussion</div></div>
+      </div>
+      <div class="rc" style="grid-column:1/-1" data-role="backstage" onclick="pickRole(this)">
+        <div class="ri">🎭</div>
+        <div><div class="rn">Backstage crew</div><div class="rs">Outfits &amp; wardrobe</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Singer -->
+  <div class="qs-card" id="qs-singer">
+    <div class="qs-header">
+      <div class="qs-badge">🎤</div>
+      <div><h2>Singer questions</h2><p>Answer all 5 questions below</p></div>
+    </div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>What vocal range do you have (e.g. soprano, baritone) and how long have you been singing?</div><textarea id="s1" name="Vocal range & experience" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>Name a song you could perform confidently right now and explain why you chose it.</div><textarea id="s2" name="Confident song choice" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>Have you performed live before? Describe the experience or what you would expect.</div><textarea id="s3" name="Live performance experience" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>How do you warm up your voice before a performance?</div><textarea id="s4" name="Vocal warmup routine" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>What musical styles or genres do you feel most comfortable singing?</div><textarea id="s5" name="Preferred genres" placeholder="Your answer..."></textarea></div>
+  </div>
+
+  <!-- Electric guitar -->
+  <div class="qs-card" id="qs-electric">
+    <div class="qs-header">
+      <div class="qs-badge">⚡</div>
+      <div><h2>Electric guitar questions</h2><p>Answer all 5 questions below</p></div>
+    </div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>How many years have you been playing electric guitar and are you self-taught or formally trained?</div><textarea id="e1" name="Years playing & training" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>What genres or styles can you play (e.g. rock, metal, blues, funk)?</div><textarea id="e2" name="Genres & styles" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>Describe your current gear — what guitar and amp do you use?</div><textarea id="e3" name="Current gear" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>Can you read tabs or sheet music? How do you usually learn new songs?</div><textarea id="e4" name="Reading music & learning method" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>Have you played in a band before? What was your role in the lineup?</div><textarea id="e5" name="Band experience" placeholder="Your answer..."></textarea></div>
+  </div>
+
+  <!-- Guitar -->
+  <div class="qs-card" id="qs-guitar">
+    <div class="qs-header">
+      <div class="qs-badge">🎸</div>
+      <div><h2>Guitar questions</h2><p>Answer all 5 questions below</p></div>
+    </div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>How long have you been playing and what type do you mainly play (acoustic, classical, bass)?</div><textarea id="g1" name="Years playing & guitar type" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>What chords, scales, or techniques are you most comfortable with?</div><textarea id="g2" name="Chords & techniques" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>Can you read tabs or sheet music, or do you play by ear?</div><textarea id="g3" name="Reading music" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>What song or riff best shows off your current skill level?</div><textarea id="g4" name="Best showcase song" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>Are you open to learning new styles or pieces if the band requires it?</div><textarea id="g5" name="Openness to learning" placeholder="Your answer..."></textarea></div>
+  </div>
+
+  <!-- Drummer -->
+  <div class="qs-card" id="qs-drummer">
+    <div class="qs-header">
+      <div class="qs-badge">🥁</div>
+      <div><h2>Drummer questions</h2><p>Answer all 5 questions below</p></div>
+    </div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>How long have you been drumming and are you self-taught or did you take lessons?</div><textarea id="d1" name="Years drumming & training" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>What time signatures and rhythmic styles are you comfortable playing?</div><textarea id="d2" name="Time signatures & styles" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>Do you own your own kit? What setup do you currently use?</div><textarea id="d3" name="Kit & setup" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>How do you keep time — do you practice with a metronome or backing track?</div><textarea id="d4" name="Timing practice method" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>Have you jammed or recorded with other musicians before? Describe the experience.</div><textarea id="d5" name="Jamming & recording experience" placeholder="Your answer..."></textarea></div>
+  </div>
+
+  <!-- Backstage crew -->
+  <div class="qs-card" id="qs-backstage">
+    <div class="qs-header">
+      <div class="qs-badge">🎭</div>
+      <div><h2>Backstage crew questions</h2><p>Answer all 5 questions below</p></div>
+    </div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>Do you have any experience with costumes, outfits, or wardrobe styling? Tell us about it.</div><textarea id="b1" name="Wardrobe experience" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>How would you describe your personal sense of style and how does it influence outfit choices for performers?</div><textarea id="b2" name="Personal style" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>How do you handle last-minute outfit changes or wardrobe emergencies before a show?</div><textarea id="b3" name="Wardrobe emergencies" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>Have you ever sourced, made, or altered clothing? Describe what you did.</div><textarea id="b4" name="Sourcing & altering clothing" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>What would your process be for designing outfits that match the band's vibe and stage presence?</div><textarea id="b5" name="Outfit design process" placeholder="Your answer..."></textarea></div>
+  </div>
+
+  <button class="submit-btn" id="submitBtn" onclick="submit()">Submit audition</button>
+</div>
+
+<div class="done" id="doneView">
+  <div class="done-ring">✅</div>
+  <h2>Audition submitted!</h2>
+  <p id="doneMsg"></p>
+  <button class="reset-btn" onclick="reset()">Submit another</button>
+</div>
+
+<script>
+const prefixes = { singer:'s', electric:'e', guitar:'g', drummer:'d', backstage:'b' };
+const roleNames = { singer:'Singer', electric:'Electric guitar', guitar:'Guitar', drummer:'Drummer', backstage:'Backstage crew' };
+let current = null;
+
+function pickRole(el) {
+  document.querySelectorAll('.rc').forEach(r => r.classList.remove('active'));
+  document.querySelectorAll('.qs-card').forEach(q => q.classList.remove('show'));
+  el.classList.add('active');
+  current = el.dataset.role;
+  const card = document.getElementById('qs-' + current);
+  card.classList.add('show');
+  setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+async function submit() {
+  const name = document.getElementById('fullName').value.trim();
+  const room = document.getElementById('roomNum').value.trim();
+  document.getElementById('errorMsg').classList.remove('show');
+  if (!name) { alert('Please enter your full name.'); return; }
+  if (!room) { alert('Please enter your room number.'); return; }
+  if (!current) { alert('Please select a role.'); return; }
+  const p = prefixes[current];
+  for (let i = 1; i <= 5; i++) {
+    if (!document.getElementById(p + i).value.trim()) {
+      alert('Please answer all 5 questions for your role.'); return;
+    }
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  const data = {
+    'Full name': name,
+    'Room number': room,
+    'Role': roleNames[current],
+  };
+  const p2 = prefixes[current];
+  for (let i = 1; i <= 5; i++) {
+    const ta = document.getElementById(p2 + i);
+    data[ta.name] = ta.value.trim();
+  }
+
+  try {
+    const res = await fetch('https://formspree.io/f/xrewpzny', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      document.getElementById('doneMsg').textContent = 'Thanks, ' + name + '! Your audition for ' + roleNames[current] + ' (room ' + room + ') has been received.';
+      document.getElementById('formView').style.display = 'none';
+      document.getElementById('doneView').classList.add('show');
+    } else {
+      throw new Error('bad response');
+    }
+  } catch(err) {
+    document.getElementById('errorMsg').classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Submit audition';
+  }
+}
+
+function reset() {
+  document.getElementById('fullName').value = '';
+  document.getElementById('roomNum').value = '';
+  document.querySelectorAll('.rc').forEach(r => r.classList.remove('active'));
+  document.querySelectorAll('.qs-card').forEach(q => {
+    q.classList.remove('show');
+    q.querySelectorAll('textarea').forEach(t => t.value = '');
+  });
+  current = null;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = false;
+  btn.textContent = 'Submit audition';
+  document.getElementById('formView').style.display = '';
+  document.getElementById('doneView').classList.remove('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
