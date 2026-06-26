@@ -4,263 +4,535 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jackson 5 Audition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --border-focus: #f5c518;
+    --text: #f0f0f0;
+    --text-muted: #888;
+    --text-secondary: #bbb;
+    --accent: #f5c518;
+    --accent-dim: rgba(245,197,24,0.12);
+    --accent-border: rgba(245,197,24,0.35);
+    --error: #ff5f5f;
+    --success: #4caf7d;
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem 4rem; }
-  .wrap { max-width: 580px; margin: 0 auto; }
-  .header { text-align: center; margin-bottom: 2rem; }
-  .icon-ring { width: 56px; height: 56px; border-radius: 50%; border: 1px solid #ddd; background: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 24px; }
-  h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
-  .sub { font-size: 14px; color: #666; }
-  .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
-  .section-tag { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #999; margin-bottom: 1rem; }
-  .field { margin-bottom: 1.1rem; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: var(--space-8) var(--space-4) 80px;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: var(--space-8); }
+  .logo-mark {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto var(--space-4);
+  }
+  .logo-mark svg { width: 26px; height: 26px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
+  .header-sub { font-size: 14px; color: var(--text-muted); margin-top: var(--space-1); }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-6);
+    margin-bottom: var(--space-3);
+  }
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+  }
+
+  /* Fields */
+  .field { margin-bottom: var(--space-4); }
   .field:last-child { margin-bottom: 0; }
-  label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 5px; }
-  .req { color: #e05c2a; margin-left: 2px; }
-  input[type=text], input[type=hidden] { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border-color .15s; }
-  input[type=text]:focus { border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,.1); }
-  .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .rc { border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: border-color .12s, background .12s; user-select: none; }
-  .rc:hover { border-color: #bbb; background: #fafafa; }
-  .rc.active { border: 2px solid #185FA5; background: #EBF3FD; }
-  .rc .ri { font-size: 20px; width: 36px; height: 36px; border-radius: 8px; background: #f5f5f3; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .rc.active .ri { background: #c5ddf7; }
-  .rc .rn { font-size: 13px; font-weight: 600; color: #1a1a1a; line-height: 1.3; }
-  .rc .rs { font-size: 11px; color: #888; }
-  .rc.active .rn { color: #0C447C; }
-  .rc.active .rs { color: #185FA5; }
-  .qs-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; display: none; }
-  .qs-card.show { display: block; animation: fadein .2s ease; }
-  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-  .qs-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
-  .qs-badge { font-size: 20px; width: 38px; height: 38px; border-radius: 8px; background: #EBF3FD; display: flex; align-items: center; justify-content: center; }
-  .qs-header h2 { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
-  .qs-header p { font-size: 12px; color: #888; }
-  .q-row { margin-bottom: 1.1rem; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+  }
+  .req { color: var(--accent); margin-left: 2px; }
+  input[type=text] {
+    width: 100%;
+    padding: 10px var(--space-3);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type=text]::placeholder { color: var(--text-muted); }
+  input[type=text]:focus { border-color: var(--border-focus); }
+
+  /* Role grid */
+  .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+  .rc {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-3) var(--space-4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    transition: border-color 0.12s, background 0.12s;
+    user-select: none;
+    min-height: 60px;
+    touch-action: manipulation;
+  }
+  .rc:hover { border-color: #444; background: var(--surface2); }
+  .rc.active {
+    border: 1.5px solid var(--accent);
+    background: var(--accent-dim);
+  }
+  .rc-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .rc-icon svg { width: 18px; height: 18px; stroke: var(--text-muted); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .rc.active .rc-icon { background: var(--accent-border); }
+  .rc.active .rc-icon svg { stroke: var(--accent); }
+  .rc-name { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .rc-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .rc.active .rc-name { color: var(--accent); }
+
+  /* Questions section */
+  .qs-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-6);
+    margin-bottom: var(--space-3);
+    display: none;
+  }
+  .qs-card.show { display: block; animation: slideup 0.2s ease; }
+  @keyframes slideup {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .qs-head {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--space-5);
+  }
+  .qs-badge {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .qs-badge svg { width: 18px; height: 18px; stroke: var(--accent); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .qs-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .qs-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+  /* Question rows */
+  .q-row { margin-bottom: var(--space-4); }
   .q-row:last-child { margin-bottom: 0; }
-  .q-lbl { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
-  .q-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #f0f0ee; border: 1px solid #ddd; font-size: 11px; font-weight: 600; color: #777; flex-shrink: 0; margin-top: 1px; }
-  textarea { width: 100%; min-height: 68px; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; outline: none; transition: border-color .15s; }
-  textarea:focus { border-color: #185FA5; box-shadow: 0 0 0 3px rgba(24,95,165,.1); }
-  .submit-btn { width: 100%; padding: 13px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity .15s; }
-  .submit-btn:hover { opacity: .85; }
-  .submit-btn:active { transform: scale(.99); }
-  .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
-  .done { display: none; text-align: center; padding: 3rem 1rem; }
+  .q-lbl {
+    display: flex; align-items: flex-start; gap: var(--space-2);
+    font-size: 13px; font-weight: 500; color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+  }
+  .q-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 10px; font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0; margin-top: 1px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 72px;
+    padding: 10px var(--space-3);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea::placeholder { color: var(--text-muted); }
+  textarea:focus { border-color: var(--border-focus); }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+    transition: opacity 0.15s, transform 0.1s;
+    touch-action: manipulation;
+  }
+  .submit-btn svg { width: 16px; height: 16px; stroke: #0f0f0f; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Error */
+  .error-banner {
+    background: rgba(255,95,95,0.1);
+    border: 1px solid rgba(255,95,95,0.3);
+    border-radius: var(--radius-sm);
+    color: var(--error);
+    font-size: 13px;
+    padding: 10px var(--space-4);
+    margin-bottom: var(--space-3);
+    display: none;
+  }
+  .error-banner.show { display: block; }
+
+  /* Done */
+  .done { display: none; text-align: center; padding: 64px var(--space-4); }
   .done.show { display: block; }
-  .done-ring { width: 56px; height: 56px; border-radius: 50%; background: #e8f5e0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 26px; }
-  .done h2 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
-  .done p { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
-  .reset-btn { font-size: 13px; padding: 9px 22px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; cursor: pointer; font-family: inherit; }
-  .reset-btn:hover { background: #f5f5f3; }
-  .error-msg { background: #fff0ee; border: 1px solid #f5c4b3; border-radius: 8px; color: #993C1D; font-size: 13px; padding: 10px 14px; margin-bottom: 1rem; display: none; }
-  .error-msg.show { display: block; }
+  .done-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: rgba(76,175,125,0.15);
+    border: 1px solid rgba(76,175,125,0.3);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto var(--space-4);
+  }
+  .done-icon svg { width: 26px; height: 26px; stroke: var(--success); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .done h2 { font-size: 20px; font-weight: 600; margin-bottom: var(--space-2); }
+  .done p { font-size: 14px; color: var(--text-muted); margin-bottom: var(--space-6); }
+  .reset-btn {
+    font-size: 13px; font-weight: 500;
+    padding: 9px 22px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer; font-family: inherit;
+    transition: border-color 0.15s;
+  }
+  .reset-btn:hover { border-color: #555; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: var(--space-4) 0; }
 </style>
 </head>
 <body>
 
 <div class="wrap" id="formView">
   <div class="header">
-    <div class="icon-ring">🎵</div>
+    <div class="logo-mark" aria-hidden="true">
+      <!-- Music note SVG -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0f0f0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13"/>
+        <circle cx="6" cy="18" r="3"/>
+        <circle cx="18" cy="16" r="3"/>
+      </svg>
+    </div>
     <h1>Jackson 5 Audition</h1>
-    <p class="sub">Select your role to reveal your questions</p>
+    <p class="header-sub">Pick your role to get your questions</p>
   </div>
 
-  <div class="error-msg" id="errorMsg">Something went wrong sending your form. Please try again.</div>
+  <div class="error-banner" id="errorBanner" role="alert">
+    Something went wrong. Please try again.
+  </div>
 
+  <!-- Info -->
   <div class="card">
-    <div class="section-tag">Your info</div>
+    <div class="card-label">Your info</div>
     <div class="field">
-      <label>Full name <span class="req">*</span></label>
-      <input type="text" id="fullName" placeholder="e.g. Alex Johnson" />
+      <label for="fullName">Full name <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="fullName" placeholder="e.g. Alex Johnson" autocomplete="name" />
     </div>
+    <div class="divider"></div>
     <div class="field">
-      <label>Room number <span class="req">*</span></label>
+      <label for="roomNum">Room number <span class="req" aria-hidden="true">*</span></label>
       <input type="text" id="roomNum" placeholder="e.g. 204" />
     </div>
   </div>
 
+  <!-- Role picker -->
   <div class="card">
-    <div class="section-tag">Select your role</div>
-    <div class="role-grid">
-      <div class="rc" data-role="singer" onclick="pickRole(this)">
-        <div class="ri">🎤</div>
-        <div><div class="rn">Singer</div><div class="rs">Lead vocals</div></div>
+    <div class="card-label">Select your role</div>
+    <div class="role-grid" role="radiogroup" aria-label="Audition role">
+
+      <div class="rc" data-role="singer" onclick="pickRole(this)" role="radio" aria-checked="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')pickRole(this)">
+        <div class="rc-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </div>
+        <div>
+          <div class="rc-name">Singer</div>
+          <div class="rc-sub">Lead vocals</div>
+        </div>
       </div>
-      <div class="rc" data-role="electric" onclick="pickRole(this)">
-        <div class="ri">⚡</div>
-        <div><div class="rn">Electric guitar</div><div class="rs">Lead / rhythm</div></div>
+
+      <div class="rc" data-role="electric" onclick="pickRole(this)" role="radio" aria-checked="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')pickRole(this)">
+        <div class="rc-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div>
+          <div class="rc-name">Electric guitar</div>
+          <div class="rc-sub">Lead / rhythm</div>
+        </div>
       </div>
-      <div class="rc" data-role="guitar" onclick="pickRole(this)">
-        <div class="ri">🎸</div>
-        <div><div class="rn">Guitar</div><div class="rs">Acoustic / bass</div></div>
+
+      <div class="rc" data-role="guitar" onclick="pickRole(this)" role="radio" aria-checked="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')pickRole(this)">
+        <div class="rc-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </div>
+        <div>
+          <div class="rc-name">Guitar</div>
+          <div class="rc-sub">Acoustic / bass</div>
+        </div>
       </div>
-      <div class="rc" data-role="drummer" onclick="pickRole(this)">
-        <div class="ri">🥁</div>
-        <div><div class="rn">Drummer</div><div class="rs">Percussion</div></div>
+
+      <div class="rc" data-role="drummer" onclick="pickRole(this)" role="radio" aria-checked="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')pickRole(this)">
+        <div class="rc-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="11" rx="10" ry="4"/><path d="M2 11v5c0 2.2 4.5 4 10 4s10-1.8 10-4v-5"/><path d="M2 16v3c0 2.2 4.5 4 10 4s10-1.8 10-4v-3"/></svg>
+        </div>
+        <div>
+          <div class="rc-name">Drummer</div>
+          <div class="rc-sub">Percussion</div>
+        </div>
       </div>
-      <div class="rc" style="grid-column:1/-1" data-role="backstage" onclick="pickRole(this)">
-        <div class="ri">🎭</div>
-        <div><div class="rn">Backstage crew</div><div class="rs">Outfits &amp; wardrobe</div></div>
+
+      <div class="rc" style="grid-column:1/-1" data-role="backstage" onclick="pickRole(this)" role="radio" aria-checked="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')pickRole(this)">
+        <div class="rc-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H5v10a2 2 0 002 2h10a2 2 0 002-2V10h1.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg>
+        </div>
+        <div>
+          <div class="rc-name">Backstage crew</div>
+          <div class="rc-sub">Outfits &amp; wardrobe</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Singer Qs -->
+  <div class="qs-card" id="qs-singer" aria-live="polite">
+    <div class="qs-head">
+      <div class="qs-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+      </div>
+      <div>
+        <div class="qs-title">Singer questions</div>
+        <div class="qs-desc">Answer all 5 below</div>
       </div>
     </div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">1</span>What vocal range do you have and how long have you been singing?</div><textarea id="s1" placeholder="Your answer..." aria-label="Vocal range and experience"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">2</span>Name a song you could perform right now and why you chose it.</div><textarea id="s2" placeholder="Your answer..." aria-label="Song choice"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">3</span>Have you performed live before? Describe the experience.</div><textarea id="s3" placeholder="Your answer..." aria-label="Live performance experience"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">4</span>How do you warm up before a performance?</div><textarea id="s4" placeholder="Your answer..." aria-label="Warmup routine"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">5</span>What genres do you feel most comfortable singing?</div><textarea id="s5" placeholder="Your answer..." aria-label="Preferred genres"></textarea></div>
   </div>
 
-  <!-- Singer -->
-  <div class="qs-card" id="qs-singer">
-    <div class="qs-header">
-      <div class="qs-badge">🎤</div>
-      <div><h2>Singer questions</h2><p>Answer all 5 questions below</p></div>
+  <!-- Electric Qs -->
+  <div class="qs-card" id="qs-electric" aria-live="polite">
+    <div class="qs-head">
+      <div class="qs-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div>
+        <div class="qs-title">Electric guitar questions</div>
+        <div class="qs-desc">Answer all 5 below</div>
+      </div>
     </div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>What vocal range do you have (e.g. soprano, baritone) and how long have you been singing?</div><textarea id="s1" name="Vocal range & experience" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>Name a song you could perform confidently right now and explain why you chose it.</div><textarea id="s2" name="Confident song choice" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>Have you performed live before? Describe the experience or what you would expect.</div><textarea id="s3" name="Live performance experience" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>How do you warm up your voice before a performance?</div><textarea id="s4" name="Vocal warmup routine" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>What musical styles or genres do you feel most comfortable singing?</div><textarea id="s5" name="Preferred genres" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">1</span>How many years have you been playing and are you self-taught or trained?</div><textarea id="e1" placeholder="Your answer..." aria-label="Years playing and training"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">2</span>What genres or styles can you play?</div><textarea id="e2" placeholder="Your answer..." aria-label="Genres and styles"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">3</span>Describe your current gear — guitar and amp.</div><textarea id="e3" placeholder="Your answer..." aria-label="Current gear"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">4</span>Can you read tabs or sheet music? How do you learn new songs?</div><textarea id="e4" placeholder="Your answer..." aria-label="Reading music and learning method"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">5</span>Have you played in a band before? What was your role?</div><textarea id="e5" placeholder="Your answer..." aria-label="Band experience"></textarea></div>
   </div>
 
-  <!-- Electric guitar -->
-  <div class="qs-card" id="qs-electric">
-    <div class="qs-header">
-      <div class="qs-badge">⚡</div>
-      <div><h2>Electric guitar questions</h2><p>Answer all 5 questions below</p></div>
+  <!-- Guitar Qs -->
+  <div class="qs-card" id="qs-guitar" aria-live="polite">
+    <div class="qs-head">
+      <div class="qs-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <div>
+        <div class="qs-title">Guitar questions</div>
+        <div class="qs-desc">Answer all 5 below</div>
+      </div>
     </div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>How many years have you been playing electric guitar and are you self-taught or formally trained?</div><textarea id="e1" name="Years playing & training" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>What genres or styles can you play (e.g. rock, metal, blues, funk)?</div><textarea id="e2" name="Genres & styles" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>Describe your current gear — what guitar and amp do you use?</div><textarea id="e3" name="Current gear" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>Can you read tabs or sheet music? How do you usually learn new songs?</div><textarea id="e4" name="Reading music & learning method" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>Have you played in a band before? What was your role in the lineup?</div><textarea id="e5" name="Band experience" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">1</span>How long have you been playing and what type — acoustic, classical, or bass?</div><textarea id="g1" placeholder="Your answer..." aria-label="Years playing and guitar type"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">2</span>What chords, scales, or techniques are you most comfortable with?</div><textarea id="g2" placeholder="Your answer..." aria-label="Chords and techniques"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">3</span>Can you read tabs or sheet music, or do you play by ear?</div><textarea id="g3" placeholder="Your answer..." aria-label="Reading music"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">4</span>What song or riff best shows off your skill right now?</div><textarea id="g4" placeholder="Your answer..." aria-label="Showcase song"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">5</span>Are you open to learning new styles if the band needs it?</div><textarea id="g5" placeholder="Your answer..." aria-label="Openness to learning"></textarea></div>
   </div>
 
-  <!-- Guitar -->
-  <div class="qs-card" id="qs-guitar">
-    <div class="qs-header">
-      <div class="qs-badge">🎸</div>
-      <div><h2>Guitar questions</h2><p>Answer all 5 questions below</p></div>
+  <!-- Drummer Qs -->
+  <div class="qs-card" id="qs-drummer" aria-live="polite">
+    <div class="qs-head">
+      <div class="qs-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="11" rx="10" ry="4"/><path d="M2 11v5c0 2.2 4.5 4 10 4s10-1.8 10-4v-5"/></svg>
+      </div>
+      <div>
+        <div class="qs-title">Drummer questions</div>
+        <div class="qs-desc">Answer all 5 below</div>
+      </div>
     </div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>How long have you been playing and what type do you mainly play (acoustic, classical, bass)?</div><textarea id="g1" name="Years playing & guitar type" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>What chords, scales, or techniques are you most comfortable with?</div><textarea id="g2" name="Chords & techniques" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>Can you read tabs or sheet music, or do you play by ear?</div><textarea id="g3" name="Reading music" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>What song or riff best shows off your current skill level?</div><textarea id="g4" name="Best showcase song" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>Are you open to learning new styles or pieces if the band requires it?</div><textarea id="g5" name="Openness to learning" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">1</span>How long have you been drumming and are you self-taught or trained?</div><textarea id="d1" placeholder="Your answer..." aria-label="Years drumming and training"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">2</span>What time signatures and styles are you comfortable playing?</div><textarea id="d2" placeholder="Your answer..." aria-label="Time signatures and styles"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">3</span>Do you own a kit? What setup do you use?</div><textarea id="d3" placeholder="Your answer..." aria-label="Kit and setup"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">4</span>How do you keep time — metronome, backing track, or something else?</div><textarea id="d4" placeholder="Your answer..." aria-label="Timing practice method"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">5</span>Have you jammed or recorded with other musicians before?</div><textarea id="d5" placeholder="Your answer..." aria-label="Jamming and recording experience"></textarea></div>
   </div>
 
-  <!-- Drummer -->
-  <div class="qs-card" id="qs-drummer">
-    <div class="qs-header">
-      <div class="qs-badge">🥁</div>
-      <div><h2>Drummer questions</h2><p>Answer all 5 questions below</p></div>
+  <!-- Backstage Qs -->
+  <div class="qs-card" id="qs-backstage" aria-live="polite">
+    <div class="qs-head">
+      <div class="qs-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H5v10a2 2 0 002 2h10a2 2 0 002-2V10h1.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg>
+      </div>
+      <div>
+        <div class="qs-title">Backstage crew questions</div>
+        <div class="qs-desc">Answer all 5 below</div>
+      </div>
     </div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>How long have you been drumming and are you self-taught or did you take lessons?</div><textarea id="d1" name="Years drumming & training" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>What time signatures and rhythmic styles are you comfortable playing?</div><textarea id="d2" name="Time signatures & styles" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>Do you own your own kit? What setup do you currently use?</div><textarea id="d3" name="Kit & setup" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>How do you keep time — do you practice with a metronome or backing track?</div><textarea id="d4" name="Timing practice method" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>Have you jammed or recorded with other musicians before? Describe the experience.</div><textarea id="d5" name="Jamming & recording experience" placeholder="Your answer..."></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">1</span>Any experience with costumes, outfits, or wardrobe styling?</div><textarea id="b1" placeholder="Your answer..." aria-label="Wardrobe experience"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">2</span>How would you describe your style and how it shapes performer looks?</div><textarea id="b2" placeholder="Your answer..." aria-label="Personal style"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">3</span>How do you handle last-minute outfit changes before a show?</div><textarea id="b3" placeholder="Your answer..." aria-label="Wardrobe emergencies"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">4</span>Have you ever sourced, made, or altered clothing? What did you do?</div><textarea id="b4" placeholder="Your answer..." aria-label="Sourcing and altering"></textarea></div>
+    <div class="q-row"><div class="q-lbl"><span class="q-num" aria-hidden="true">5</span>How would you design outfits that match the band's vibe?</div><textarea id="b5" placeholder="Your answer..." aria-label="Outfit design process"></textarea></div>
   </div>
 
-  <!-- Backstage crew -->
-  <div class="qs-card" id="qs-backstage">
-    <div class="qs-header">
-      <div class="qs-badge">🎭</div>
-      <div><h2>Backstage crew questions</h2><p>Answer all 5 questions below</p></div>
-    </div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">1</span>Do you have any experience with costumes, outfits, or wardrobe styling? Tell us about it.</div><textarea id="b1" name="Wardrobe experience" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">2</span>How would you describe your personal sense of style and how does it influence outfit choices for performers?</div><textarea id="b2" name="Personal style" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">3</span>How do you handle last-minute outfit changes or wardrobe emergencies before a show?</div><textarea id="b3" name="Wardrobe emergencies" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">4</span>Have you ever sourced, made, or altered clothing? Describe what you did.</div><textarea id="b4" name="Sourcing & altering clothing" placeholder="Your answer..."></textarea></div>
-    <div class="q-row"><div class="q-lbl"><span class="q-num">5</span>What would your process be for designing outfits that match the band's vibe and stage presence?</div><textarea id="b5" name="Outfit design process" placeholder="Your answer..."></textarea></div>
-  </div>
-
-  <button class="submit-btn" id="submitBtn" onclick="submit()">Submit audition</button>
+  <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    Submit audition
+  </button>
 </div>
 
+<!-- Done state -->
 <div class="done" id="doneView">
-  <div class="done-ring">✅</div>
-  <h2>Audition submitted!</h2>
+  <div class="done-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h2>You're in!</h2>
   <p id="doneMsg"></p>
-  <button class="reset-btn" onclick="reset()">Submit another</button>
+  <button class="reset-btn" onclick="resetForm()">Submit another</button>
 </div>
 
 <script>
-const prefixes = { singer:'s', electric:'e', guitar:'g', drummer:'d', backstage:'b' };
+const prefixes  = { singer:'s', electric:'e', guitar:'g', drummer:'d', backstage:'b' };
 const roleNames = { singer:'Singer', electric:'Electric guitar', guitar:'Guitar', drummer:'Drummer', backstage:'Backstage crew' };
 let current = null;
 
 function pickRole(el) {
-  document.querySelectorAll('.rc').forEach(r => r.classList.remove('active'));
+  document.querySelectorAll('.rc').forEach(r => { r.classList.remove('active'); r.setAttribute('aria-checked','false'); });
   document.querySelectorAll('.qs-card').forEach(q => q.classList.remove('show'));
   el.classList.add('active');
+  el.setAttribute('aria-checked','true');
   current = el.dataset.role;
   const card = document.getElementById('qs-' + current);
   card.classList.add('show');
-  setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60);
 }
 
-async function submit() {
+async function submitForm() {
   const name = document.getElementById('fullName').value.trim();
   const room = document.getElementById('roomNum').value.trim();
-  document.getElementById('errorMsg').classList.remove('show');
+  document.getElementById('errorBanner').classList.remove('show');
   if (!name) { alert('Please enter your full name.'); return; }
   if (!room) { alert('Please enter your room number.'); return; }
-  if (!current) { alert('Please select a role.'); return; }
+  if (!current) { alert('Please pick a role first.'); return; }
   const p = prefixes[current];
   for (let i = 1; i <= 5; i++) {
-    if (!document.getElementById(p + i).value.trim()) {
+    if (!document.getElementById(p+i).value.trim()) {
       alert('Please answer all 5 questions for your role.'); return;
     }
   }
-
   const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
+  btn.disabled = true; btn.textContent = 'Sending…';
 
-  const data = {
-    'Full name': name,
-    'Room number': room,
-    'Role': roleNames[current],
-  };
-  const p2 = prefixes[current];
+  const payload = { 'Full name': name, 'Room number': room, 'Role': roleNames[current] };
   for (let i = 1; i <= 5; i++) {
-    const ta = document.getElementById(p2 + i);
-    data[ta.name] = ta.value.trim();
+    const ta = document.getElementById(p+i);
+    payload[ta.getAttribute('aria-label')] = ta.value.trim();
   }
 
   try {
     const res = await fetch('https://formspree.io/f/xrewpzny', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(payload)
     });
     if (res.ok) {
-      document.getElementById('doneMsg').textContent = 'Thanks, ' + name + '! Your audition for ' + roleNames[current] + ' (room ' + room + ') has been received.';
+      document.getElementById('doneMsg').textContent =
+        'Thanks ' + name + ' — your ' + roleNames[current] + ' audition for room ' + room + ' is in. We\'ll be in touch.';
       document.getElementById('formView').style.display = 'none';
       document.getElementById('doneView').classList.add('show');
-    } else {
-      throw new Error('bad response');
-    }
-  } catch(err) {
-    document.getElementById('errorMsg').classList.add('show');
-    btn.disabled = false;
-    btn.textContent = 'Submit audition';
+    } else { throw new Error(); }
+  } catch {
+    document.getElementById('errorBanner').classList.add('show');
+    btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;stroke:#0f0f0f;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Submit audition';
   }
 }
 
-function reset() {
+function resetForm() {
   document.getElementById('fullName').value = '';
   document.getElementById('roomNum').value = '';
-  document.querySelectorAll('.rc').forEach(r => r.classList.remove('active'));
-  document.querySelectorAll('.qs-card').forEach(q => {
-    q.classList.remove('show');
-    q.querySelectorAll('textarea').forEach(t => t.value = '');
-  });
+  document.querySelectorAll('.rc').forEach(r => { r.classList.remove('active'); r.setAttribute('aria-checked','false'); });
+  document.querySelectorAll('.qs-card').forEach(q => { q.classList.remove('show'); q.querySelectorAll('textarea').forEach(t => t.value=''); });
   current = null;
   const btn = document.getElementById('submitBtn');
   btn.disabled = false;
-  btn.textContent = 'Submit audition';
+  btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;stroke:#0f0f0f;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Submit audition';
   document.getElementById('formView').style.display = '';
   document.getElementById('doneView').classList.remove('show');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top:0, behavior:'smooth' });
 }
 </script>
 </body>
