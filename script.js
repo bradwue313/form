@@ -1,373 +1,219 @@
-// Constants
-const prefixes = {
-  singer:'s',
-  electric:'e',
-  guitar:'g',
-  drummer:'d',
-  backstage:'b'
-};
-
-const roleNames = {
-  singer:'Singer',
-  electric:'Electric guitar',
-  guitar:'Guitar',
-  drummer:'Drummer',
-  backstage:'Backstage crew'
-};
+const prefixes = { singer:'s', electric:'e', guitar:'g', drummer:'d', backstage:'b' };
+const roleNames = { singer:'Singer', electric:'Electric guitar', guitar:'Guitar', drummer:'Drummer', backstage:'Backstage crew' };
 
 let currentRole = null;
 let isSubmitting = false;
 
-// DOM Elements
-const formView = document.getElementById('formView');
-const successScreen = document.getElementById('successScreen');
-const errorBanner = document.getElementById('errorBanner');
-const submitBtn = document.getElementById('submitBtn');
-const resetBtn = document.getElementById('resetBtn');
-const buttonText = submitBtn.querySelector('.button-text');
-const spinner = submitBtn.querySelector('.spinner');
+const successScreen  = document.getElementById('successScreen');
+const errorBanner    = document.getElementById('errorBanner');
+const submitBtn      = document.getElementById('submitBtn');
+const resetBtn       = document.getElementById('resetBtn');
+const buttonText     = submitBtn.querySelector('.button-text');
+const spinner        = submitBtn.querySelector('.spinner');
 const questionsSection = document.getElementById('questionsSection');
-const successTitle = document.getElementById('successTitle');
 const successMessage = document.getElementById('successMessage');
 
-// Initialize form on load
 document.addEventListener('DOMContentLoaded', () => {
-  // Add keyboard navigation for role cards
   document.querySelectorAll('.role-option').forEach(option => {
-    option.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        selectRole(option);
-      }
-    });
-
-    // Add focus indicator
-    option.addEventListener('focus', () => {
-      option.style.boxShadow = '0 0 0 3px var(--accent-dim)';
-    });
-
-    option.addEventListener('blur', () => {
-      option.style.boxShadow = '';
+    option.addEventListener('click', () => selectRole(option));
+    option.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectRole(option); }
     });
   });
 
-  // Add input validation styling
-  document.querySelectorAll('input, textarea').forEach(input => {
-    input.addEventListener('input', () => {
-      if (input.value.trim()) {
-        input.classList.add('has-value');
-        input.classList.remove('error');
-      } else {
-        input.classList.remove('has-value');
-      }
-    });
-
-    // Add visual feedback for empty required fields on blur
+  document.querySelectorAll('input[type=text]').forEach(input => {
     input.addEventListener('blur', () => {
-      if (input.hasAttribute('aria-required') && !important', () => {
       if (input.hasAttribute('aria-required') && !input.value.trim()) {
         input.classList.add('error');
-        input.style.borderColor = 'var(--error)';
       }
     });
-
     input.addEventListener('focus', () => {
-      if (input.hasAttribute('aria-required') && !input.value.trim()) {
-        input.style.borderColor = '';
-        input.classList.remove('error');
-      }
+      input.classList.remove('error');
+    });
+    input.addEventListener('input', () => {
+      if (input.value.trim()) input.classList.remove('error');
     });
   });
 });
 
-// Role selection
 function selectRole(option) {
-  // Don't allow interaction during submission
   if (isSubmitting) return;
 
-  // Update ARIA states
   document.querySelectorAll('.role-option').forEach(opt => {
     opt.classList.remove('active');
-    const isSelected = opt === option;
-    opt.setAttribute('aria-checked', String(isSelected));
-    opt.setAttribute('aria-label', `${roleNames[opt.dataset.role]} role, ${isSelected ? 'selected' : 'not selected'}`);
+    opt.setAttribute('aria-checked', 'false');
   });
 
-  // Hide all question sections
+  option.classList.add('active');
+  option.setAttribute('aria-checked', 'true');
+  currentRole = option.dataset.role;
+
   questionsSection.innerHTML = '';
   questionsSection.classList.remove('show');
-
-  // Show selected role card
-  option.classList.add('active');
-  currentRole = option.dataset.role;
   loadQuestionsForRole(currentRole);
 
-  // Smooth scroll to the question section
   setTimeout(() => {
     questionsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    // Focus first textarea in the section
-    setTimeout(() => {
-      const firstInput = questionsSection.querySelector('input, textarea');
-      if (firstInput) {
-        firstInput.focus();
-      }
-    }, 100);
   }, 60);
 }
 
-// Load questions based on role
 function loadQuestionsForRole(role) {
   const questions = getQuestionsForRole(role);
+  const icons = {
+    singer: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/>',
+    electric: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+    guitar: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+    drummer: '<ellipse cx="12" cy="11" rx="10" ry="4"/><path d="M2 11v5c0 2.2 4.5 4 10 4s10-1.8 10-4v-5"/>',
+    backstage: '<path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H5v10a2 2 0 002 2h10a2 2 0 002-2V10h1.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>'
+  };
 
-  questions.forEach((q, index) => {
-    const questionDiv = document.createElement('div');
-    questionDiv.className = 'question-row';
-    questionDiv.innerHTML = `
+  const header = document.createElement('div');
+  header.className = 'questions-header';
+  header.innerHTML = `
+    <div class="questions-badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24">${icons[role]}</svg>
+    </div>
+    <div>
+      <div class="questions-title">${roleNames[role]} questions</div>
+      <div class="questions-desc">Answer all 5 below</div>
+    </div>`;
+  questionsSection.appendChild(header);
+
+  questions.forEach((q, i) => {
+    const row = document.createElement('div');
+    row.className = 'question-row';
+    row.innerHTML = `
       <div class="question-label">
-        <span class="question-number" aria-hidden="${index + 1}">${index + 1}</span>
+        <span class="question-number" aria-hidden="true">${i + 1}</span>
         ${q.question}
       </div>
-      <textarea
-        id="${prefixes[role]}${index + 1}"
-        placeholder="Your answer..."
-        aria-label="${q.description}"
-        rows="3"
-      ></textarea>
-    `;
-    questionsSection.appendChild(questionDiv);
+      <textarea id="${prefixes[role]}${i + 1}" placeholder="Your answer..." aria-label="${q.description}" rows="3"></textarea>`;
+    questionsSection.appendChild(row);
   });
 
   questionsSection.classList.add('show');
 }
 
-// Get questions for each role
 function getQuestionsForRole(role) {
-  switch(role) {
-    case 'singer':
-      return [
-        { question: "What vocal range do you have and how long have you been singing?", description: "Vocal range and experience" },
-        { question: "Name a song you could perform right now and why you chose it.", description: "Song choice" },
-        { question: "Have you performed live before? Describe the experience.", description: "Live performance experience" },
-        { question: "How do you warm up before a performance?", description: "Warmup routine" },
-        { question: "What genres do you feel most comfortable singing?", description: "Preferred genres" }
-      ];
-    case 'electric':
-      return [
-        { question: "How many years have you been playing and are you self-taught or trained?", description: "Years playing and training" },
-        { question: "What genres or styles can you play?", description: "Genres and styles" },
-        { question: "Describe your current gear — guitar and amp.", description: "Current gear" },
-        { question: "Can you read tabs or sheet music? How do you learn new songs?", description: "Reading music and learning method" },
-        { question: "What's your favorite guitar technique and why?", description: "Favorite guitar technique" }
-      ];
-    case 'guitar':
-      return [
-        { question: "How many years have you been playing guitar?", description: "Years playing guitar" },
-        { question: "What types of guitars do you play?", description: "Types of guitars" },
-        { question: "Describe your playing style.", description: "Playing style" },
-        { question: "Can you read sheet music or tabs?", description: "Reading music" },
-        { question: "What's your favorite song to play and why?", description: "Favorite song" }
-      ];
-    case 'drummer':
-      return [
-        { question: "How many years have you been playing drums?", description: "Years playing drums" },
-        { question: "What styles of drumming do you play?", description: "Drumming styles" },
-        { question: "Describe your drum kit setup.", description: "Drum kit setup" },
-        { question: "How do you practice timing and rhythm?", description: "Timing practice" },
-        { question: "Who are your drumming influences and why?", description: "Drumming influences" }
-      ];
-    case 'backstage':
-      return [
-        { question: "What experience do you have with wardrobe or costumes?", description: "Wardrobe experience" },
-        { question: "How do you handle quick changes during performances?", description: "Quick changes" },
-        { question: "What's your experience with stage management?", description: "Stage management" },
-        { question: "How do you stay organized during busy show periods?", description: "Organization skills" },
-        { question: "What do you enjoy most about working behind the scenes?", description: "Backstage enjoyment" }
-      ];
-    default:
-      return [];
-  }
+  const qs = {
+    singer: [
+      { question: "What vocal range do you have and how long have you been singing?", description: "Vocal range and experience" },
+      { question: "Name a song you could perform right now and why you chose it.", description: "Song choice" },
+      { question: "Have you performed live before? Describe the experience.", description: "Live performance experience" },
+      { question: "How do you warm up before a performance?", description: "Warmup routine" },
+      { question: "What genres do you feel most comfortable singing?", description: "Preferred genres" }
+    ],
+    electric: [
+      { question: "How many years have you been playing and are you self-taught or trained?", description: "Years playing and training" },
+      { question: "What genres or styles can you play?", description: "Genres and styles" },
+      { question: "Describe your current gear — guitar and amp.", description: "Current gear" },
+      { question: "Can you read tabs or sheet music? How do you learn new songs?", description: "Reading music and learning method" },
+      { question: "Have you played in a band before? What was your role?", description: "Band experience" }
+    ],
+    guitar: [
+      { question: "How long have you been playing and what type — acoustic, classical, or bass?", description: "Years playing and guitar type" },
+      { question: "What chords, scales, or techniques are you most comfortable with?", description: "Chords and techniques" },
+      { question: "Can you read tabs or sheet music, or do you play by ear?", description: "Reading music" },
+      { question: "What song or riff best shows off your skill right now?", description: "Showcase song" },
+      { question: "Are you open to learning new styles if the band needs it?", description: "Openness to learning" }
+    ],
+    drummer: [
+      { question: "How long have you been drumming and are you self-taught or trained?", description: "Years drumming and training" },
+      { question: "What time signatures and styles are you comfortable playing?", description: "Time signatures and styles" },
+      { question: "Do you own a kit? What setup do you use?", description: "Kit and setup" },
+      { question: "How do you keep time — metronome, backing track, or something else?", description: "Timing practice method" },
+      { question: "Have you jammed or recorded with other musicians before?", description: "Jamming and recording experience" }
+    ],
+    backstage: [
+      { question: "Any experience with costumes, outfits, or wardrobe styling?", description: "Wardrobe experience" },
+      { question: "How would you describe your style and how it shapes performer looks?", description: "Personal style" },
+      { question: "How do you handle last-minute outfit changes before a show?", description: "Wardrobe emergencies" },
+      { question: "Have you ever sourced, made, or altered clothing? What did you do?", description: "Sourcing and altering" },
+      { question: "How would you design outfits that match the band's vibe?", description: "Outfit design process" }
+    ]
+  };
+  return qs[role] || [];
 }
 
-// Form submission
 async function submitForm() {
-  // Prevent multiple submissions
   if (isSubmitting) return;
 
-  // Get form values
   const name = document.getElementById('fullName').value.trim();
   const room = document.getElementById('roomNum').value.trim();
-
-  // Reset error state
   errorBanner.classList.remove('show');
 
-  // Validate required fields
-  if (!name) {
-    showError('Please enter your full name.');
-    document.getElementById('fullName').focus();
-    document.getElementById('fullName').classList.add('error');
-    return;
-  }
+  if (!name) { showError('Please enter your full name.'); document.getElementById('fullName').focus(); return; }
+  if (!room) { showError('Please enter your room number.'); document.getElementById('roomNum').focus(); return; }
+  if (!currentRole) { showError('Please pick a role first.'); return; }
 
-  if (!room) {
-    showError('Please enter your room number.');
-    document.getElementById('roomNum').focus();
-    document.getElementById('roomNum').classList.add('error');
-    return;
-  }
-
-  if (!currentRole) {
-    showError('Please pick a role first.');
-    return;
-  }
-
-  // Validate role-specific questions
   const p = prefixes[currentRole];
   for (let i = 1; i <= 5; i++) {
-    const textarea = document.getElementById(p + i);
-    if (!textarea.value.trim()) {
-      showError('Please answer all 5 questions for your role.');
-      textarea.focus();
-      textarea.classList.add('error');
-      return;
-    }
+    const ta = document.getElementById(p + i);
+    if (!ta || !ta.value.trim()) { showError('Please answer all 5 questions.'); ta && ta.focus(); return; }
   }
 
-  // Set submitting state
   isSubmitting = true;
   setSubmittingState(true);
 
-  // Prepare payload
-  const payload = {
-    'Full name': name,
-    'Room number': room,
-    'Role': roleNames[currentRole]
-  };
-
+  const payload = { 'Full name': name, 'Room number': room, 'Role': roleNames[currentRole] };
   for (let i = 1; i <= 5; i++) {
-    const textarea = document.getElementById(p + i);
-    payload[textarea.getAttribute('aria-label')] = textarea.value.trim();
+    const ta = document.getElementById(p + i);
+    payload[ta.getAttribute('aria-label')] = ta.value.trim();
   }
 
   try {
-    // Submit to Formspree
-    const response = await fetch('https://formspree.io/f/xrewpzny', {
+    const res = await fetch('https://formspree.io/f/xrewpzny', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(payload)
     });
-
-    if (response.ok) {
-      // Show success state
-      successMessage.textContent = `Thanks ${name} — your ${roleNames[currentRole]} audition for room ${room} is in. We'll be in touch.`;
-      formView.style.display = 'none';
+    if (res.ok) {
+      document.getElementById('successMessage').textContent =
+        `Thanks ${name} — your ${roleNames[currentRole]} audition for room ${room} is in. We'll be in touch.`;
+      document.querySelector('.container').style.display = 'none';
       successScreen.classList.add('show');
-
-      // Reset form after delay for next submission
-      setTimeout(() => {
-        resetForm();
-      }, 5000);
-    } else {
-      throw new Error('Submission failed');
-    }
-  } catch (error) {
-    // Show error state
+    } else { throw new Error(); }
+  } catch {
     showError('Failed to submit. Please check your connection and try again.');
+    isSubmitting = false;
     setSubmittingState(false);
   }
 }
 
-// Show error message
-function showError(message) {
-  errorBanner.textContent = message;
+function showError(msg) {
+  errorBanner.textContent = msg;
   errorBanner.classList.add('show');
-
-  // Auto-hide after 5 seconds
-  setTimeout(() => {
-    errorBanner.classList.remove('show');
-  }, 5000);
+  setTimeout(() => errorBanner.classList.remove('show'), 5000);
 }
 
-// Set submitting state UI
-function setSubmittingState(isSubmitting) {
-  if (isSubmitting) {
-    submitBtn.disabled = true;
-    submitBtn.classList.add('loading');
-    buttonText.style.visibility = 'hidden';
-    spinner.style.display = 'block';
-  } else {
-    submitBtn.disabled = false;
-    submitBtn.classList.remove('loading');
-    buttonText.style.visibility = 'visible';
-    spinner.style.display = 'none';
-  }
+function setSubmittingState(state) {
+  submitBtn.disabled = state;
+  submitBtn.classList.toggle('loading', state);
+  buttonText.style.visibility = state ? 'hidden' : 'visible';
+  spinner.style.display = state ? 'block' : 'none';
 }
 
-// Reset form
 function resetForm() {
-  // Reset form fields
   document.getElementById('fullName').value = '';
   document.getElementById('roomNum').value = '';
-  document.getElementById('fullName').classList.remove('error', 'has-value');
-  document.getElementById('roomNum').classList.remove('error', 'has-value');
-
-  // Reset role selection
-  document.querySelectorAll('.role-option').forEach(option => {
-    option.classList.remove('active');
-    option.setAttribute('aria-checked', 'false');
-    option.setAttribute('aria-label', `${roleNames[option.dataset.role]} role, not selected`);
-  });
-
-  // Hide all question sections and clear textareas
+  document.querySelectorAll('.role-option').forEach(o => { o.classList.remove('active'); o.setAttribute('aria-checked','false'); });
   questionsSection.innerHTML = '';
   questionsSection.classList.remove('show');
-
   currentRole = null;
   isSubmitting = false;
   setSubmittingState(false);
-
-  // Hide success screen, show form
-  formView.style.display = '';
+  document.querySelector('.container').style.display = '';
   successScreen.classList.remove('show');
-
-  // Scroll to top and focus first field
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  document.getElementById('fullName').focus();
 }
 
-// Handle Enter key in form fields
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !isSubmitting) {
-    const activeElement = document.activeElement;
-
-    // If Enter is pressed in a textarea, submit if Ctrl+Enter
-    if (activeElement.tagName === 'TEXTAREA' && e.ctrlKey) {
-      e.preventDefault();
-      submitForm();
-    }
-
-    // If Enter is pressed on submit button or in a field (but not textarea for new line)
-    if ((activeElement === submitBtn ||
-         (activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT')) &&
-        !(activeElement.tagName === 'TEXTAREA' && !e.ctrlKey)) {
-      e.preventDefault();
-      submitForm();
-    }
-  }
-});
-
-// Prevent form submission on Enter in textarea (allow new lines)
-document.querySelectorAll('textarea').forEach(textarea => {
-  textarea.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.ctrlKey) {
-      // Allow natural newline behavior
-      return;
-    }
-  });
-});
-
-// Attach event listeners
 submitBtn.addEventListener('click', submitForm);
 resetBtn.addEventListener('click', resetForm);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !isSubmitting) {
+    const el = document.activeElement;
+    if (el.tagName === 'INPUT') { e.preventDefault(); submitForm(); }
+    if (el.tagName === 'TEXTAREA' && e.ctrlKey) { e.preventDefault(); submitForm(); }
+  }
+});
